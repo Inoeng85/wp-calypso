@@ -17,6 +17,8 @@ var DetailItem = require( './detail-item' ),
 import { ModalViews } from 'state/ui/media-modal/constants';
 import { setEditorMediaModalView } from 'state/ui/editor/actions';
 
+import { fetch } from 'lib/media/actions';
+
 const EditorMediaModalDetail = React.createClass( {
 	propTypes: {
 		site: React.PropTypes.object,
@@ -33,6 +35,20 @@ const EditorMediaModalDetail = React.createClass( {
 			selectedIndex: 0,
 			onSelectedIndexChange: noop
 		};
+	},
+	componentWillMount() {
+		if ( this.props.site.jetpack ) {
+			return null;
+		}
+
+		const { items, selectedIndex, site, } = this.props;
+		const item = items[ selectedIndex ];
+
+		// re-fetch the media post for non Jetpack sites
+		// @TODO: clean this `hack` once media is reduxifid and/or media endpoints `1.2` are implemented in Jetpack plugin.
+		if ( ! site.jetpack ) {
+			fetch( site.ID, item.ID, { apiVersion: '1.2' } );
+		}
 	},
 
 	componentDidMount: function() {

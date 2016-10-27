@@ -183,7 +183,9 @@ export const EditorMediaModal = React.createClass( {
 			return null;
 		}
 
-		MediaActions.fetch( siteId, item.ID );
+		const queryParams = this.props.site.jetpack ? {} : { apiVersion: '1.2' };
+
+		MediaActions.fetch( siteId, item.ID, queryParams );
 	},
 
 	applyRestoreOriginalMedia: function( item ) {

@@ -37,7 +37,7 @@ MediaActions.setQuery = function( siteId, query ) {
 	} );
 };
 
-MediaActions.fetch = function( siteId, itemId ) {
+MediaActions.fetch = function( siteId, itemId, queryParams = { apiVersion: '1.1' } ) {
 	var fetchKey = [ siteId, itemId ].join();
 	if ( MediaActions._fetching[ fetchKey ] ) {
 		return;
@@ -51,7 +51,7 @@ MediaActions.fetch = function( siteId, itemId ) {
 	} );
 
 	debug( 'Fetching media for %d using ID %d', siteId, itemId );
-	wpcom.site( siteId ).media( itemId ).get( { apiVersion: '1.2' }, function( error, data ) {
+	wpcom.site( siteId ).media( itemId ).get( queryParams, function( error, data ) {
 		Dispatcher.handleServerAction( {
 			type: 'RECEIVE_MEDIA_ITEM',
 			error: error,
@@ -76,8 +76,6 @@ MediaActions.fetchNextPage = function( siteId ) {
 	} );
 
 	query = MediaListStore.getNextPageQuery( siteId );
-
-	query.apiVersion = '1.2';
 
 	debug( 'Fetching media for %d using query %o', siteId, query );
 	wpcom.site( siteId ).mediaList( query, function( error, data ) {
