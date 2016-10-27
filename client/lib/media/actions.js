@@ -258,7 +258,7 @@ MediaActions.updateTemporally = function( type, siteId, item ) {
 };
 
 MediaActions.edit = function( siteId, item ) {
-	var newItem = assign( {}, MediaStore.get( siteId, item.ID ), item );
+	const newItem = { ...MediaStore.get( siteId, item.ID ), ...item };
 
 	Dispatcher.handleViewAction( {
 		type: 'RECEIVE_MEDIA_ITEM',
