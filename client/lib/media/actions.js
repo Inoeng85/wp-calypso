@@ -216,15 +216,19 @@ MediaActions.add = function( siteId, files ) {
 	}, Promise.resolve() );
 };
 
-MediaActions.cleanTemporaryData = function( siteId, item, fields ) {
-	for ( let i = 0; i < fields.length; i++ ) {
-		delete item[ fields[ i ] ];
-	}
+MediaActions.cleanTemporaryData = function( siteId, item ) {
+	/* eslint-disable no-unused-vars */
+	const {
+		loading_original,
+		original_loaded,
+		media,
+		...rest
+	} = item;
 
 	const updateAction = {
 		type: 'RECEIVE_MEDIA_ITEM',
 		siteId,
-		data: item
+		data: rest
 	};
 
 	Dispatcher.handleViewAction( updateAction );

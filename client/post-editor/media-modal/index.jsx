@@ -345,12 +345,7 @@ export const EditorMediaModal = React.createClass( {
 			const item = mediaLibrarySelectedItems[ i ];
 
 			if ( item.original_loaded || item.loading_original ) {
-				MediaActions.cleanTemporaryData( site.ID, item, [
-					'loading_original',
-					'original_loaded',
-					'media'
-				] );
-
+				MediaActions.cleanTemporaryData( site.ID, item );
 				MediaActions.fetch( site.ID, item.ID );
 			}
 		}
