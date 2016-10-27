@@ -179,7 +179,7 @@ class EditorMediaModalDetailItem extends Component {
 			<div className={ classes }>
 				{ originalWasLoaded && this.renderDiscardRestoreButton( classname ) }
 				{ hasOriginal && this.renderRestoreButton( classname ) }
-				{ this.renderEditButton( classname ) }
+				{ this.renderEditButton() }
 			</div>
 		);
 	}
