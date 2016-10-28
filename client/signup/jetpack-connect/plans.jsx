@@ -3,7 +3,8 @@
  */
 import { connect } from 'react-redux';
 import page from 'page';
-import React from 'react';
+import React, { Component, PropTypes } from 'react';
+import { localize } from 'i18n-calypso';
 
 /**
  * Internal dependencies
@@ -26,21 +27,19 @@ import { getSelectedSite } from 'state/ui/selectors';
 
 const CALYPSO_REDIRECTION_PAGE = '/posts/';
 
-const Plans = React.createClass( {
-	propTypes: {
-		cart: React.PropTypes.object.isRequired,
-		context: React.PropTypes.object.isRequired,
-		destinationType: React.PropTypes.string,
-		sitePlans: React.PropTypes.object.isRequired,
-		showJetpackFreePlan: React.PropTypes.bool,
-		intervalType: React.PropTypes.string
-	},
+class Plans extends Component {
+	static propTypes = {
+		cart: PropTypes.object.isRequired,
+		context: PropTypes.object.isRequired,
+		destinationType: PropTypes.string,
+		sitePlans: PropTypes.object.isRequired,
+		showJetpackFreePlan: PropTypes.bool,
+		intervalType: PropTypes.string
+	};
 
-	getDefaultProps() {
-		return {
-			intervalType: 'yearly'
-		};
-	},
+	static defaultProps = {
+		intervalType: 'yearly'
+	};
 
 	componentDidMount() {
 		this.props.recordTracksEvent( 'calypso_jpc_plans_view', {
@@ -50,7 +49,7 @@ const Plans = React.createClass( {
 		if ( this.props.flowType === 'pro' || this.props.flowType === 'premium' ) {
 			return this.autoselectPlan();
 		}
-	},
+	}
 
 	componentDidUpdate() {
 		if ( this.hasPlan( this.props.selectedSite ) ) {
@@ -63,13 +62,13 @@ const Plans = React.createClass( {
 		if ( ! this.props.isRequestingPlans && ( this.props.flowType === 'pro' || this.props.flowType === 'premium' ) ) {
 			return this.autoselectPlan();
 		}
-	},
+	}
 
 	hasPlan( site ) {
 		return site &&
 			site.plan &&
 			( site.plan.product_slug === 'jetpack_business' || site.plan.product_slug === 'jetpack_premium' );
-	},
+	}
 
 	autoselectPlan() {
 		if ( this.props.flowType === 'pro' ) {
@@ -86,7 +85,7 @@ const Plans = React.createClass( {
 				return;
 			}
 		}
-	},
+	}
 
 	selectFreeJetpackPlan() {
 		this.props.recordTracksEvent( 'calypso_jpc_plans_submit_free', {
@@ -98,7 +97,7 @@ const Plans = React.createClass( {
 			const { queryObject } = this.props.jetpackConnectAuthorize;
 			this.props.goBackToWpAdmin( queryObject.redirect_after_auth );
 		}
-	},
+	}
 
 	selectPlan( cartItem ) {
 		const checkoutPath = `/checkout/${ this.props.selectedSite.slug }`;
@@ -117,9 +116,11 @@ const Plans = React.createClass( {
 		}
 		upgradesActions.addItem( cartItem );
 		page( checkoutPath );
-	},
+	}
 
 	render() {
+		const { translate } = this.props;
+
 		if ( this.props.flowType === 'pro' || this.props.flowType === 'premium' ) {
 			return null;
 		}
@@ -135,8 +136,8 @@ const Plans = React.createClass( {
 					<QuerySitePlans siteId={ this.props.selectedSite.ID } />
 					<div className="jetpack-connect__plans">
 						<StepHeader
-							headerText={ this.translate( 'Your site is now connected!' ) }
-							subHeaderText={ this.translate( 'Now pick a plan that\'s right for you.' ) }
+							headerText={ translate( 'Your site is now connected!' ) }
+							subHeaderText={ translate( 'Now pick a plan that\'s right for you.' ) }
 							step={ 1 }
 							steps={ 3 } />
 
@@ -153,7 +154,7 @@ const Plans = React.createClass( {
 			</div>
 		);
 	}
-} );
+}
 
 export default connect(
 	state => {
@@ -180,4 +181,4 @@ export default connect(
 		goBackToWpAdmin,
 		recordTracksEvent
 	}
-)( Plans );
+)( localize( Plans ) );
