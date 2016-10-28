@@ -148,6 +148,11 @@ export default connect(
 		let options = pick( ALL_THEME_OPTIONS, optionNames );
 		let mapGetUrl = identity, mapHideForSite = identity;
 
+		// We bind hideForTheme to siteId even if it is null since the selectors
+		// that are used by it are expected to recognize that case as "no site selected"
+		// and work accordingly.
+		const mapHideForTheme = hideForTheme => ( t ) => hideForTheme( state, t, siteId );
+
 		if ( siteId ) {
 			mapGetUrl = getUrl => ( t ) => getUrl( state, t, siteId );
 			options = pickBy( options, option =>
@@ -172,6 +177,9 @@ export default connect(
 			option.hideForSite
 				? { hideForSite: mapHideForSite( option.hideForSite ) }
 				: {},
+			option.hideForTheme
+			? { hideForTheme: mapHideForTheme( option.hideForTheme ) }
+			: {}
 		) );
 	},
 	( dispatch, { siteId, source = 'unknown' } ) => {
