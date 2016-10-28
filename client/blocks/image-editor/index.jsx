@@ -151,8 +151,13 @@ const ImageEditor = React.createClass( {
 			resetAllImageEditorState: this.props.resetAllImageEditorState
 		};
 
-		if ( media && media.ID ) {
-			imageProperties.ID = media.ID;
+		if ( media ) {
+			if ( media.ID ) {
+				imageProperties.ID = media.ID;
+			}
+			if ( media.post_ID !== null ) {
+				imageProperties.post_ID = media.post_ID;
+			}
 		}
 
 		return imageProperties;
