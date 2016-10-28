@@ -205,8 +205,6 @@ export const EditorMediaModal = React.createClass( {
 			return;
 		}
 		MediaActions.update( siteId, { ID: item.ID, media_url: item.guid }, true );
-		MediaActions.setLibrarySelectedItems( siteId, [] );
-		this.props.setView( ModalViews.LIST );
 	},
 
 	onImageEditorDone( error, blob, imageEditorProps ) {
@@ -238,8 +236,8 @@ export const EditorMediaModal = React.createClass( {
 
 		resetAllImageEditorState();
 
-		MediaActions.setLibrarySelectedItems( this.props.site.ID, [] );
-		this.props.setView( ModalViews.LIST );
+		this.props.setView( ModalViews.DETAIL );
+
 	},
 
 	onImageEditorCancel: function( imageEditorProps ) {
