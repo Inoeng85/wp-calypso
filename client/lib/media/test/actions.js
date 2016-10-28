@@ -100,7 +100,7 @@ describe( 'MediaActions', function() {
 		sandbox = sinon.sandbox.create();
 		sandbox.stub( Dispatcher, 'handleServerAction' );
 		sandbox.stub( Dispatcher, 'handleViewAction' );
-		mediaGet = sandbox.stub().callsArgWithAsync( 1, null, DUMMY_API_RESPONSE );
+		mediaGet = sandbox.stub().callsArgWithAsync( 0, null, DUMMY_API_RESPONSE );
 		mediaList = sandbox.stub().callsArgWithAsync( 1, null, DUMMY_API_RESPONSE );
 		mediaAdd = sandbox.stub().returns( Promise.resolve( DUMMY_API_RESPONSE ) );
 		mediaAddUrls = sandbox.stub().returns( Promise.resolve( DUMMY_API_RESPONSE ) );

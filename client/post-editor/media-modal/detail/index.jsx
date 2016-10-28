@@ -4,7 +4,6 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { noop, partial } from 'lodash';
-import classNames from 'classnames';
 
 /**
  * Internal dependencies
@@ -16,8 +15,6 @@ var DetailItem = require( './detail-item' ),
 	preloadImage = require( '../preload-image' );
 import { ModalViews } from 'state/ui/media-modal/constants';
 import { setEditorMediaModalView } from 'state/ui/editor/actions';
-
-import { fetch } from 'lib/media/actions';
 
 const EditorMediaModalDetail = React.createClass( {
 	propTypes: {
@@ -35,20 +32,6 @@ const EditorMediaModalDetail = React.createClass( {
 			selectedIndex: 0,
 			onSelectedIndexChange: noop
 		};
-	},
-	componentWillMount() {
-		if ( this.props.site.jetpack ) {
-			return null;
-		}
-
-		const { items, selectedIndex, site, } = this.props;
-		const item = items[ selectedIndex ];
-
-		// re-fetch the media post for non Jetpack sites
-		// @TODO: clean this `hack` once media is reduxifid and/or media endpoints `1.2` are implemented in Jetpack plugin.
-		if ( ! site.jetpack ) {
-			fetch( site.ID, item.ID, { apiVersion: '1.2' } );
-		}
 	},
 
 	componentDidMount: function() {
@@ -81,21 +64,13 @@ const EditorMediaModalDetail = React.createClass( {
 
 			onEditItem,
 			onRestoreItem,
-			onImageItemLoad,
-			onApplyRestoreItem,
-			onDiscardRestoreItem,
 			onReturnToList,
 		} = this.props;
 
 		const item = items[ selectedIndex ];
 
 		return (
-			<div className={ classNames(
-				'editor-media-modal-detail',
-				{ 'is-loading-original': item.loading_original },
-				{ 'is-original-loaded': item.original_loaded },
-			) }
-			>
+			<div className="editor-media-modal-detail">
 				<HeaderCake onClick={ onReturnToList } backText={ this.translate( 'Media Library' ) }>
 					<EditorMediaModalDetailTitle
 						site={ site }
@@ -108,11 +83,8 @@ const EditorMediaModalDetail = React.createClass( {
 					hasNextItem={ selectedIndex + 1 < items.length }
 					onShowPreviousItem={ this.incrementIndex.bind( this, -1 ) }
 					onShowNextItem={ this.incrementIndex.bind( this, 1 ) }
-					onEdit={ onEditItem }
 					onRestore={ onRestoreItem }
-					onRestoreApply={ onApplyRestoreItem }
-					onRestoreDiscard={ onDiscardRestoreItem }
-					onImageLoad={ onImageItemLoad } />
+					onEdit={ onEditItem } />
 			</div>
 		);
 	}

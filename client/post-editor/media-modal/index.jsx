@@ -138,81 +138,6 @@ export const EditorMediaModal = React.createClass( {
 		this.props.onClose( selectedItems );
 	},
 
-	restoreOriginalMedia: function( item ) {
-		const siteId = this.props.site ? this.props.site.ID : null;
-
-		if ( ! siteId ) {
-			return null;
-		}
-
-		const media = item.revision_history && item.revision_history.original
-			? item.revision_history.original.URL
-			: null;
-
-		MediaActions.updateTemporally( 'RECEIVE_MEDIA_ITEM', siteId, {
-			ID: item.ID,
-			loading_original: true,
-			original_loaded: false,
-			media
-		} );
-	},
-
-	originalMediaLoaded: function( item ) {
-		if ( ! item.loading_original ) {
-			return null;
-		}
-
-		const siteId = this.props.site ? this.props.site.ID : null;
-
-		if ( ! siteId ) {
-			return null;
-		}
-
-		MediaActions.updateTemporally( 'RECEIVE_MEDIA_ITEM', siteId, {
-			ID: item.ID,
-			loading_original: false,
-			original_loaded: true,
-			'transient': false
-		} );
-	},
-
-	discardRestoreOriginalMedia: function( item ) {
-		const siteId = this.props.site ? this.props.site.ID : null;
-
-		if ( ! siteId ) {
-			return null;
-		}
-
-		const queryParams = this.props.site.jetpack ? {} : { apiVersion: '1.2' };
-
-		MediaActions.fetch( siteId, item.ID, queryParams );
-	},
-
-	applyRestoreOriginalMedia: function( item ) {
-		const siteId = this.props.site ? this.props.site.ID : null;
-
-		if ( ! siteId ) {
-			return null;
-		}
-
-		const media_url = item.revision_history && item.revision_history.original
-			? item.revision_history.original.URL
-			: null;
-
-		// set restoring original to true
-		delete item.loading_original;
-		delete item.original_loaded;
-
-		const updateAction = {
-			ID: item.ID,
-			media_url
-		};
-
-		MediaActions.update( siteId, updateAction, true );
-		MediaActions.setLibrarySelectedItems( this.props.site.ID, [] );
-		this.props.setView( ModalViews.LIST );
-	},
-
 	setDetailSelectedIndex: function( index ) {
 		this.setState( {
 			detailSelectedIndex: index
@@ -275,6 +200,15 @@ export const EditorMediaModal = React.createClass( {
 		this.props.setView( ModalViews.IMAGE_EDITOR );
 	},
 
+	restoreOriginalMedia: function( siteId, item ) {
+		if ( ! siteId || ! item ) {
+			return;
+		}
+		MediaActions.update( siteId, { ID: item.ID, media_url: item.guid }, true );
+		MediaActions.setLibrarySelectedItems( siteId, [] );
+		this.props.setView( ModalViews.LIST );
+	},
+
 	onImageEditorDone( error, blob, imageEditorProps ) {
 		if ( error ) {
 			this.onImageEditorCancel( imageEditorProps );
@@ -334,23 +268,6 @@ export const EditorMediaModal = React.createClass( {
 		return detailSelectedIndex;
 	},
 
-	cleanTemporaryChanges() {
-		const { site, mediaLibrarySelectedItems } = this.props;
-
-		if ( ! mediaLibrarySelectedItems.length || ! site.ID ) {
-			return null;
-		}
-
-		for ( let i = 0; i < mediaLibrarySelectedItems.length; i++ ) {
-			const item = mediaLibrarySelectedItems[ i ];
-
-			if ( item.original_loaded || item.loading_original ) {
-				MediaActions.cleanTemporaryData( site.ID, item );
-				MediaActions.fetch( site.ID, item.ID );
-			}
-		}
-	},
-
 	onFilterChange: function( filter ) {
 		if ( filter !== this.state.filter ) {
 			analytics.mc.bumpStat( 'editor_media_actions', 'filter_' + ( filter || 'all' ) );
@@ -380,7 +297,6 @@ export const EditorMediaModal = React.createClass( {
 	},
 
 	onClose: function() {
-		this.cleanTemporaryChanges();
 		this.props.onClose();
 	},
 
@@ -477,9 +393,6 @@ export const EditorMediaModal = React.createClass( {
 						items={ this.props.mediaLibrarySelectedItems }
 						selectedIndex={ this.getDetailSelectedIndex() }
 						onRestoreItem={ this.restoreOriginalMedia }
-						onApplyRestoreItem={ this.applyRestoreOriginalMedia }
-						onDiscardRestoreItem={ this.discardRestoreOriginalMedia }
-						onImageItemLoad={ this.originalMediaLoaded }
 						onSelectedIndexChange={ this.setDetailSelectedIndex } />
 				);
 				break;

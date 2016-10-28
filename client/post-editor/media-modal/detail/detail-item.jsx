@@ -6,6 +6,7 @@ import classNames from 'classnames';
 import { noop } from 'lodash';
 import debugFactory from 'debug';
 import { localize } from 'i18n-calypso';
+import url from 'url';
 
 /**
  * Internal dependencies
@@ -33,9 +34,7 @@ class EditorMediaModalDetailItem extends Component {
 		onShowPreviousItem: PropTypes.func,
 		onShowNextItem: PropTypes.func,
 		onEdit: PropTypes.func,
-		onImageLoad: PropTypes.func,
 		onRestore: PropTypes.func,
-		onRestoreApply: PropTypes.func,
 	};
 
 	static defaultProps = {
@@ -44,9 +43,7 @@ class EditorMediaModalDetailItem extends Component {
 		onShowPreviousItem: noop,
 		onShowNextItem: noop,
 		onEdit: noop,
-		onImageLoad: noop,
 		onRestore: noop,
-		onRestoreApply: noop,
 	};
 
 	renderEditButton() {
@@ -82,74 +79,49 @@ class EditorMediaModalDetailItem extends Component {
 			<Button
 				className="editor-media-modal-detail__edit"
 				onClick={ onEdit }
-				disabled={ isItemBeingUploaded( item ) || item.original_loaded }
+				disabled={ isItemBeingUploaded( item ) }
 			>
 				<Gridicon icon="pencil" size={ 36 } /> { translate( 'Edit Image' ) }
 			</Button>
 		);
 	}
 
+	handleOnRestoreClick = () => {
+		const { site, item, onRestore } = this.props;
+		onRestore( site && site.ID, item );
+	}
+
 	renderRestoreButton() {
 		const {
 			item,
-			onRestore,
-			onRestoreApply,
 			translate
 		} = this.props;
 
-		const isLoading = item.loading_original;
-		const isReadyToRestore = item.original_loaded;
+		//do a simple guid vs url check
+		const guidParts = url.parse( item.guid );
+		const URLParts = url.parse( item.URL );
 
-		const handleRestoringMethod = event => {
-			if ( isReadyToRestore ) {
-				return onRestoreApply( item, event );
-			}
-
-			return onRestore( item, event );
-		};
-
-		const buttonText = isReadyToRestore ? translate( 'Apply' ) : translate( 'Restore Original' );
+		if ( guidParts.pathname === URLParts.pathname ) {
+			return false;
+		}
 
 		return (
 			<Button
 				className={ classNames(
 					'editor-media-modal-detail__restore',
-					{ 'is-loading': isLoading },
-					{ 'is-ready': isReadyToRestore },
 				) }
-				disabled={ isLoading }
-				onClick={ handleRestoringMethod }
+				onClick={ this.handleOnRestoreClick }
+				disabled={ isItemBeingUploaded( item ) }
 			>
 				<Gridicon
-					icon={ isReadyToRestore ? 'checkmark' : 'refresh' }
+					icon="refresh"
 					size={ 36 } />
-					&nbsp;{ buttonText }
+					{ translate( 'Restore Original' ) }
 			</Button>
 		);
 	}
 
-	renderDiscardRestoreButton() {
-		const {
-			item,
-			onRestoreDiscard,
-			translate
-		} = this.props;
-
-		const handleCancelRestoringMethod = event => {
-			onRestoreDiscard( item, event );
-		};
-
-		return (
-			<Button
-				className="editor-media-modal-detail__cancel_restore"
-				onClick={ handleCancelRestoringMethod }
-			>
-				<Gridicon icon="trash" size={ 36 } /> { translate( 'Discard' ) }
-			</Button>
-		);
-	}
-
-	renderEditionBar( item, classname = 'is-desktop' ) {
+	renderImageEditorButtons( item, classname = 'is-desktop' ) {
 		const { site } = this.props;
 
 		// Do not render edit button for private sites
@@ -167,18 +139,11 @@ class EditorMediaModalDetailItem extends Component {
 			return null;
 		}
 
-		const hasOriginal = item.revision_history &&
-			item.revision_history.original &&
-			item.revision_history.original.URL;
-
-		const originalWasLoaded = ! item.loading_original && item.original_loaded;
-
 		const classes = classNames( 'editor-media-modal-detail__edition-bar', classname );
 
 		return (
 			<div className={ classes }>
-				{ originalWasLoaded && this.renderDiscardRestoreButton( classname ) }
-				{ hasOriginal && this.renderRestoreButton( classname ) }
+				{ this.renderRestoreButton( classname ) }
 				{ this.renderEditButton() }
 			</div>
 		);
@@ -245,7 +210,10 @@ class EditorMediaModalDetailItem extends Component {
 	}
 
 	renderItem() {
-		const { item, site } = this.props;
+		const {
+			item,
+			site
+		} = this.props;
 
 		if ( ! item ) {
 			return null;
@@ -262,14 +230,9 @@ class EditorMediaModalDetailItem extends Component {
 			default: Item = EditorMediaModalDetailPreviewDocument; break;
 		}
 
-		const handleOnLoad = ( event ) => {
-			this.props.onImageLoad( item, event );
-		};
-
 		return React.createElement( Item, {
 			site: site,
-			item: item,
-			onLoad: handleOnLoad
+			item: item
 		} );
 	}
 
@@ -286,13 +249,13 @@ class EditorMediaModalDetailItem extends Component {
 
 					<div className="editor-media-modal-detail__preview-wrapper">
 						{ this.renderItem() }
-						{ this.renderEditionBar( item ) }
+						{ this.renderImageEditorButtons( item ) }
 						{ this.renderPreviousItemButton() }
 						{ this.renderNextItemButton() }
 					</div>
 
 					<div className="editor-media-modal-detail__sidebar">
-						{ this.renderEditionBar( item, 'is-mobile' ) }
+						{ this.renderImageEditorButtons( item, 'is-mobile' ) }
 						{ this.renderFields() }
 						<EditorMediaModalDetailFileInfo
 							item={ item } />
