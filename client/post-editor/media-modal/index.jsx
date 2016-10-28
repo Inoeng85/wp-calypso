@@ -218,6 +218,7 @@ export const EditorMediaModal = React.createClass( {
 			fileName,
 			site,
 			ID,
+			post_ID,
 			resetAllImageEditorState
 		} = imageEditorProps;
 
@@ -225,6 +226,7 @@ export const EditorMediaModal = React.createClass( {
 
 		const item = {
 			ID: ID,
+			parent_id: post_ID,
 			media: {
 				fileName: fileName,
 				fileContents: blob,
@@ -237,7 +239,6 @@ export const EditorMediaModal = React.createClass( {
 		resetAllImageEditorState();
 
 		this.props.setView( ModalViews.DETAIL );
-
 	},
 
 	onImageEditorCancel: function( imageEditorProps ) {
